@@ -4,12 +4,10 @@ import os
 from openpyxl import Workbook
 from datetime import date
 import pandas as pd
-
 def main():
     sales_csv = get_sales_csv()
     orders_dir = create_orders_dir(sales_csv)
     process_sales_data(sales_csv, orders_dir)
-
 # Get path of sales data CSV file from the command line
 def get_sales_csv():
     if len(sys.argv) < 2:
@@ -20,7 +18,6 @@ def get_sales_csv():
         print("Error: Provided file path does not exist.")
         sys.exit()
     return csv_file
-
 # Create the directory to hold the individual order Excel sheets
 def create_orders_dir(sales_csv):
     csv_dir = os.path.dirname(sales_csv)
@@ -29,7 +26,6 @@ def create_orders_dir(sales_csv):
     if not os.path.exists(orders_dir):
         os.mkdir(orders_dir)
     return orders_dir
-
 # Split the sales data into individual orders and save to Excel sheets
 def process_sales_data(sales_csv, orders_dir):
     sales_data = pd.read_csv(sales_csv)
@@ -41,11 +37,21 @@ def process_sales_data(sales_csv, orders_dir):
         order_data = order_data.reset_index(drop=True)
         grand_total = order_data['TOTAL PRICE'].sum()
         order_data = order_data.append(
-            {'ITEM NUMBER': 'GRAND TOTAL', 'TOTAL PRICE': grand_total}, ignore_index=True
-        )
+            {'ITEM NUMBER': 'GRAND TOTAL', 'TOTAL PRICE': grand_total}, ignore_index=True)
         order_file = os.path.join(orders_dir, str(order_id) + ".xlsx")
         order_data.to_excel(order_file, index=False, engine='openpyxl')
         # TODO: Format the Excel sheet
-
+        wb = openpyxl.load_workbook(order_file)
+        sheet = wb.worksheets[0]
+        # Format the Excel sheet
+        sheet.column_dimensions['A'].width = 15
+        sheet.column_dimensions['B'].width = 15
+        sheet.column_dimensions['C'].width = 15
+        sheet.column_dimensions['D'].width = 15
+        sheet.column_dimensions['E'].width = 15
+        for row in sheet.iter_rows(min_row=2, min_col=4, max_col=5):
+            for cell in row:
+                cell.number_format = '"$"#,##0.00'
+        wb.save(order_file)
 if __name__ == '__main__':
     main()
