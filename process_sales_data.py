@@ -30,7 +30,7 @@ def create_orders_dir(sales_csv):
 def process_sales_data(sales_csv, orders_dir):
     sales_data = pd.read_csv(sales_csv)
     sales_data['TOTAL PRICE'] = sales_data['ITEM QUANTITY'] * sales_data['ITEM PRICE']
-    sales_data = sales_data[['ORDER ID', 'ITEM NUMBER', 'ITEM QUANTITY', 'ITEM PRICE', 'TOTAL PRICE']]
+    sales_data = sales_data[['ORDER DATE', 'ITEM NUMBER', 'PRODUCT LINE', 'PRODUCT CODE', 'ITEM QUANTITY', 'ITEM PRICE', 'TOTAL PRICE', 'STATUS', 'CUSTOMER NAME']]
     orders = sales_data.groupby(by='ORDER ID')
     for order_id, order_data in orders:
         order_data = order_data.sort_values(by='ITEM NUMBER')
@@ -44,11 +44,15 @@ def process_sales_data(sales_csv, orders_dir):
         wb = openpyxl.load_workbook(order_file)
         sheet = wb.worksheets[0]
         # Format the Excel sheet
-        sheet.column_dimensions['A'].width = 15
-        sheet.column_dimensions['B'].width = 15
+        sheet.column_dimensions['A'].width = 11
+        sheet.column_dimensions['B'].width = 13
         sheet.column_dimensions['C'].width = 15
         sheet.column_dimensions['D'].width = 15
         sheet.column_dimensions['E'].width = 15
+        sheet.column_dimensions['F'].width = 13
+        sheet.column_dimensions['G'].width = 13
+        sheet.column_dimensions['H'].width = 10
+        sheet.column_dimensions['I'].width = 30
         for row in sheet.iter_rows(min_row=2, min_col=4, max_col=5):
             for cell in row:
                 cell.number_format = '"$"#,##0.00'
